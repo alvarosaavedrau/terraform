@@ -1,9 +1,16 @@
 resource "aws_vpc" "vpc" {
   for_each = var.vpc
 
-  cidr_block           = "10.0.0.0/16"
-  instance_tenancy     = "default"
-  enable_dns_hostnames = true
+  cidr_block           = each.value.cidr_block
+  instance_tenancy     = each.value.instance_tenancy
+  enable_dns_hostnames = each.value.enable_dns_hostnames
+
+  tags = merge(
+    var.common_tags,
+    {
+      "Name" = "vpc1-terraform",
+    }
+  )
 }
 
 resource "aws_subnet" "subnets" {
@@ -14,6 +21,13 @@ resource "aws_subnet" "subnets" {
   availability_zone       = each.value.availability_zone
   map_public_ip_on_launch = each.value.map_public_ip_on_launch
 
+  tags = merge(
+    var.common_tags,
+    {
+      "Name" = "subnet1-terraform",
+    }
+  )
+
   depends_on = [aws_vpc.vpc]
 }
 
@@ -21,6 +35,13 @@ resource "aws_internet_gateway" "igw" {
   for_each = var.internet_gateway
 
   vpc_id = aws_vpc.vpc[each.value.vpc_name].id
+
+  tags = merge(
+    var.common_tags,
+    {
+      "Name" = "igw1-terraform",
+    }
+  )
 
   depends_on = [aws_vpc.vpc]
 }
