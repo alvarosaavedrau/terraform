@@ -8,12 +8,12 @@ resource "aws_vpc" "vpc" {
   tags = merge(
     var.common_tags,
     {
-      "Name" = "vpc1-terraform",
+      "Name" = "vpc-${each.key}"
     }
   )
 }
 
-resource "aws_subnet" "subnets" {
+resource "aws_subnet" "subnet" {
   for_each = var.subnets
 
   vpc_id                  = aws_vpc.vpc[each.value.vpc_name].id
@@ -24,14 +24,14 @@ resource "aws_subnet" "subnets" {
   tags = merge(
     var.common_tags,
     {
-      "Name" = "subnet1-terraform",
+      "Name" = "subnet-${each.key}-${each.value.vpc_name}"
     }
   )
 
   depends_on = [aws_vpc.vpc]
 }
 
-resource "aws_internet_gateway" "igw" {
+resource "aws_internet_gateway" "internetGateway" {
   for_each = var.internet_gateway
 
   vpc_id = aws_vpc.vpc[each.value.vpc_name].id
@@ -39,7 +39,7 @@ resource "aws_internet_gateway" "igw" {
   tags = merge(
     var.common_tags,
     {
-      "Name" = "igw1-terraform",
+      "Name" = "interget_gateway-${each.key}-${each.value.vpc_name}"
     }
   )
 
@@ -56,7 +56,7 @@ resource "aws_security_group" "securityGroup" {
   tags = merge(
     var.common_tags,
     {
-      "Name" = "${each.value.sg_name}",
+      "Name" = "security_group-${each.key}-${each.value.vpc_name}"
     }
   )
 
